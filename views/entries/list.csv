@@ -1,0 +1,11 @@
+<?php
+$count = 1;
+foreach ($data['entries'] as $entry) {
+  printf(
+    "%d,%s,%.2f,%s" . PHP_EOL, 
+    $count, 
+    htmlspecialchars($entry['date'], ENT_COMPAT, 'UTF-8'),
+    htmlspecialchars($entry['hours'], ENT_COMPAT, 'UTF-8'),
+    htmlspecialchars($entry['comment'], ENT_COMPAT, 'UTF-8')
+  );
+}
