@@ -6,6 +6,16 @@ use \Psr\Http\Message\ResponseInterface as Response;
 require '../vendor/autoload.php';
 require '../config.php';
 
+// if VCAP_SERVICES environment available
+// overwrite local credentials with environment credentials
+if ($services = getenv("VCAP_SERVICES")) {
+  $services_json = json_decode($services, true);
+  $config['settings']['db']['hostname'] = $services_json['cleardb'][0]['credentials']['hostname'];
+  $config['settings']['db']['username'] = $services_json['cleardb'][0]['credentials']['username'];
+  $config['settings']['db']['password'] = $services_json['cleardb'][0]['credentials']['password'];
+  $config['settings']['db']['name'] = $services_json['cleardb'][0]['credentials']['name'];
+}
+
 // configure Slim application instance
 // initialize application
 $app = new \Slim\App($config);
@@ -18,7 +28,7 @@ $container['view'] = function ($container) {
   return new \Slim\Views\PhpRenderer("../views/");
 };
 
-// configure MySQL client to DI container
+// configure and add MySQL client to DI container
 $container['db'] = function ($container) {
   $config = $container->get('settings');
   return new mysqli(
@@ -136,7 +146,7 @@ $app->get('/entries/{id:[0-9]+}[/{download}]', function (Request $request, Respo
   }
 })->setName('entries-list');
 
-// time entry modification form renderer
+// time entry form renderer
 $app->get('/entries/save', function (Request $request, Response $response, $args) {
   // query for all project records
   $projects = $this->db->query("SELECT * FROM projects");
@@ -146,8 +156,8 @@ $app->get('/entries/save', function (Request $request, Response $response, $args
   return $response;
 })->setName('entries-save');
 
-// time entry modification controller
-$app->post('/entries/save[/{id}]', function (Request $request, Response $response, $args) {
+// time entry form processor
+$app->post('/entries/save', function (Request $request, Response $response, $args) {
   // get configuration
   $config = $this->get('settings');
   // get input values

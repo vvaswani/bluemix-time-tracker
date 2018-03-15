@@ -8,4 +8,5 @@ foreach ($data['entries'] as $entry) {
     htmlspecialchars($entry['hours'], ENT_COMPAT, 'UTF-8'),
     htmlspecialchars($entry['comment'], ENT_COMPAT, 'UTF-8')
   );
+  $count++;
 }
